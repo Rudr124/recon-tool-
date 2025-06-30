@@ -4,9 +4,8 @@ import subprocess
 import re
 import shutil
 import requests
-inpu=input("enter file name to input intoeg:-eni.txt")
 
-def run_command(cmd, output_file=inpu):
+def run_command(cmd, output_file=None):
     print(f"\n[+] Running: {cmd}")
     result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
     if output_file:
@@ -33,6 +32,14 @@ def extract_ports(nmap_output):
         if match:
             ports.append(int(match.group(1)))
     return ports
+
+def is_web_alive(target, port):
+    proto = "https" if port == 443 else "http"
+    try:
+        r = requests.get(f"{proto}://{target}:{port}", timeout=5)
+        return r.status_code < 500
+    except:
+        return False
 
 def run_ffuf(target, port, wordlist, loot_dir):
     protocol = "https" if port == 443 else "http"
@@ -62,15 +69,16 @@ def screenshot_web(target, port, loot_dir):
     run_command(cmd)
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python3 ultra_recon.py <target>")
+    target = sys.argv[1] if len(sys.argv) > 1 else None
+    if not target:
+        print("Usage: python3 script.py <target>")
         sys.exit(1)
 
-    target = sys.argv[1]
+    inpu = input("Enter file name to log raw command output (e.g. eni.txt): ").strip()
     wordlist = "/usr/share/seclists/Discovery/Web-Content/raft-medium-words.txt"
 
     if not os.path.exists(wordlist):
-        print("[-] Wordlist not found. Please place wordlist.txt or update the script.")
+        print("[-] Wordlist not found. Please update the wordlist path.")
         sys.exit(1)
 
     loot_dir = f"loot/{target}"
@@ -79,6 +87,9 @@ def main():
     print(f"[+] Target: {target}")
 
     port_output = scan_ports(target, loot_dir)
+    with open(inpu, "w") as f:
+        f.write(port_output)
+
     open_ports = extract_ports(port_output)
     print(f"[+] Open ports: {open_ports}")
 
@@ -94,7 +105,6 @@ def main():
 
     waybackurls(target, loot_dir)
     subdomain_enum(target, loot_dir)
-    
 
 if __name__ == "__main__":
     main()
