@@ -1,8 +1,5 @@
 # Ultra Recon Toolkit Installer - Install all dependencies in one go
 
-# Update and install base tools
-sudo apt update && sudo apt install -y golang nmap python3-pip snapd
-
 # Install Go-based tools
 go install github.com/tomnomnom/waybackurls@latest
 go install github.com/ffuf/ffuf@latest
@@ -13,12 +10,8 @@ go install github.com/RustScan/RustScan@latest
 # Install Snap-based tools
 sudo snap install gowitness
 
-# Install Python tools
-pip install arjun
-
 # Add Go bin to PATH (temporary for this session)
 export PATH=$PATH:$(go env GOPATH)/bin
 
-# Optional: Add this to your ~/.bashrc or ~/.zshrc to make it permanent
-# echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.bashrc && source ~/.bashrc
-# echo 'export PATH=$PATH:$(go env GOPATH)/bin' >> ~/.zshrc && source ~/.zshrc
+#installing last one 
+sudo apt install seclists
