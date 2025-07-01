@@ -23,6 +23,14 @@ def scan_ports(target, loot_dir):
         print("[*] Using nmap for full port scan...")
         cmd = f"nmap -p- -T5 -Pn -v {target}"
     output = run_command(cmd, f"{loot_dir}/nmap.txt")
+    
+    take=input(str("enter yes or no to scan for vuln script"))
+    if take=="yes":
+        print("running scripts")
+        cmd = f"nmap -T5 -v --script vuln {target}"
+    else:
+        pass
+    output = run_command(cmd, f"{loot_dir}/nmap.txt")
     return output
 
 def extract_ports(nmap_output):
@@ -45,7 +53,8 @@ def run_ffuf(target, port, wordlist, loot_dir):
     protocol = "https" if port == 443 else "http"
     url = f"{protocol}://{target}:{port}/FUZZ"
     output = f"{loot_dir}/ffuf_{port}.json"
-    cmd = f"ffuf -u {url} -w {wordlist} -mc all -t 100 -o {output}"
+    cmd = f"ffuf -u {url} -w {wordlist} -mc all -t 100 -o {output} -s"
+
     run_command(cmd)
 
 def waybackurls(target, loot_dir):
@@ -76,7 +85,7 @@ def main():
 
     inpu = input("Enter file name to log raw command output (e.g. eni.txt): ").strip()
     wordlist = "/usr/share/seclists/Discovery/Web-Content/raft-medium-words.txt"
-
+    
     if not os.path.exists(wordlist):
         print("[-] Wordlist not found. Please update the wordlist path.")
         sys.exit(1)
@@ -102,6 +111,9 @@ def main():
             run_ffuf(target, port, wordlist, loot_dir)
             arjun_scan(target, port, loot_dir)
             screenshot_web(target, port, loot_dir)
+     
+
+        
 
     waybackurls(target, loot_dir)
     subdomain_enum(target, loot_dir)
